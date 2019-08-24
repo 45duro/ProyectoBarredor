@@ -1,9 +1,9 @@
 #include <SoftwareSerial.h>
-SoftwareSerial Bluetooth(2, 3); // RX, TX
+SoftwareSerial Bluetooth(7, 8); // RX, TX
 
 //Tabla de motores
-byte motores[] = {5,6,9,10};
-
+byte motores[] = {3,5,9,10};
+byte pinRGB[] = {13, 11, 6};
 //Recepción de Datos
 volatile char dato=0;
 int valoresEnteros;
@@ -17,48 +17,59 @@ void setup() {
     pinMode(motores[i], 1);
   }
 
+  for(byte i = 0; i < 3; i++){
+    pinMode(pinRGB[i], 1);
+  }
 
 }
 
 void loop() {
-  Serial.println(dato);
-  while(Serial.available()>0){
-    dato=Serial.read();
+  Serial.write(dato);
+  while(Bluetooth.available()>0){
+    dato=Bluetooth.read();
   }
 
   switch(dato){
     case 'a':
       adelante();
+      cambioLedRGB(0,0,255);
       break;
-    case 'a':
+    case 'b':
       atras();
+      cambioLedRGB(0,127,127);
       break;
-    case 'a':
+    case 'r':
       derecha();
+      cambioLedRGB(255,255,0);
       break;
-    case 'a':
+    case 'l':
       izquierda();
+      cambioLedRGB(255,255,0);
       break;
-    case 'a':
+    case 'g':
       gito360Left();
+      cambioLedRGB(0,51,102);
       break;
-    case 'a':
+    case 'h':
       gito360Right();
+      cambioLedRGB(0,51,102);
       break;
-    case 'a':
+    case 'f':
       frenar();
+      cambioLedRGB(255,0,0);
       break;
     default:
-      parar()
+      parar();
+      cambioLedRGB(255,255,255);
       break;
   }
   
 }
 
 void cambioLedRGB(short R, short G, short B){
-  analogWrite(13,R);
-  analogWrite(12,G);
-  analogWrite(11,B);
+  analogWrite(pinRGB[0],R);
+  analogWrite(pinRGB[1],G);
+  analogWrite(pinRGB[2],B);
 }
 
 
@@ -78,15 +89,15 @@ void atras(){
 
 void derecha(){
   digitalWrite(motores[0],0);
-  digitalWrite(motores[1],1);
-  digitalWrite(motores[2],0);
+  digitalWrite(motores[1],0);
+  digitalWrite(motores[2],1);
   digitalWrite(motores[3],0);
 }
 
 void izquierda(){
-  digitalWrite(motores[0],0);
+  digitalWrite(motores[0],1);
   digitalWrite(motores[1],0);
-  digitalWrite(motores[2],1);
+  digitalWrite(motores[2],0);
   digitalWrite(motores[3],0);
 }
 
@@ -118,4 +129,7 @@ void frenar(){
   digitalWrite(motores[1],1);
   digitalWrite(motores[2],1);
   digitalWrite(motores[3],1);
+  delay(100);
+  dato = 0;
+  
 }
