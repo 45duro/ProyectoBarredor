@@ -1,6 +1,11 @@
-volatile char dato = 0;
+volatile char dato = 0, datoViejo = 0;
 String data = "";
 int velocidad = 100;
+
+unsigned long previousMillis = 0;        // will store last time LED was updated
+const long interval = 1000;           // interval at which to blink (milliseconds)
+
+
 
 void setup() {
 
@@ -15,7 +20,7 @@ void setup() {
 }
 
 void loop() {
-
+  
   if (Serial.available()>0){
     dato = Serial.read();
 
@@ -27,6 +32,7 @@ void loop() {
       dato=0;
     }
 
+    
     switch (dato){
       case 'A':
         adelante(velocidad);
@@ -52,29 +58,51 @@ void loop() {
       default:
         apagar(0);
         break;
-
-
-
-
-      
     }
-    
+
+    datoViejo = dato;
   }
 }
 
 
 void adelante(byte velocidad){
 
-  analogWrite(6, velocidad); analogWrite(10, velocidad + 20);
-  analogWrite(5, velocidad); analogWrite(9, velocidad + 20);
-  
-  
+  if (dato != datoViejo){
+    //Para de inicio
+    delay(200);
+    for(int i = 0; i < velocidad; i++ ){
+      
+      //aumento de velocidad de a un milisegungo      
+      analogWrite(6, i); analogWrite(10, i + 20);
+      analogWrite(5, i); analogWrite(9, i + 20);
+      
+    
+      digitalWrite(4,1); digitalWrite(11,1);
+      digitalWrite(3,1); digitalWrite(12,1);
+    
+      digitalWrite(7,0); digitalWrite(8,0);
+      digitalWrite(2,0); digitalWrite(13,0);
 
-  digitalWrite(4,1); digitalWrite(11,1);
-  digitalWrite(3,1); digitalWrite(12,1);
+      delay(1);
+      
+    }
+    
+  }
+  else{
 
-  digitalWrite(7,0); digitalWrite(8,0);
-  digitalWrite(2,0); digitalWrite(13,0);
+    analogWrite(6, velocidad); analogWrite(10, velocidad + 20);
+    analogWrite(5, velocidad); analogWrite(9, velocidad + 20);
+    
+    
+  
+    digitalWrite(4,1); digitalWrite(11,1);
+    digitalWrite(3,1); digitalWrite(12,1);
+  
+    digitalWrite(7,0); digitalWrite(8,0);
+    digitalWrite(2,0); digitalWrite(13,0);
+    
+  }
+  
 
 }
 
@@ -169,6 +197,12 @@ void apagar(byte velocidad){
 }
 
 
-void arrancadorSuave(int velMAx){
-  
+void arrancadorSuave(int velMAx, int intervalo){
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= intervalo) {
+    // save the last time you blinked the LED
+    
+  }
+    
 }
