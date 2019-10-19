@@ -1,135 +1,308 @@
-#include <SoftwareSerial.h>
-SoftwareSerial Bluetooth(7, 8); // RX, TX
+/*
+          PINES BARREDOR
+4  ||         Adelante       || 11 
+   ||-6--------PWM--------10-||
+7  ||         Atras          || 8
+                |
+                |
+                |
+                |
+                |
+                |
+                |
+3  ||        Adelante        || 12
+   ||-5--------PWM---------9-||
+2  ||        Atras           || 13
 
-//Tabla de motores
-byte motores[] = {3,5,9,10};
-byte pinRGB[] = {13, 11, 6};
-//Recepción de Datos
-volatile char dato=0;
-int valoresEnteros;
+*/
+
+
+volatile char dato = 0, datoViejo = 0;
+String data = "";
+int velocidad = 100, T=5, esperaInicial=1500;
+
+
+unsigned long previousMillis = 0;        // will store last time LED was updated
+const long interval = 1000;           // interval at which to blink (milliseconds)
 
 
 void setup() {
-  Bluetooth.begin(9600);
+  
+
   Serial.begin(9600);
-  //Volver a los los pines salidas motores
-  for(byte i = 0; i < 4; i++){
-    pinMode(motores[i], 1);
+  
+  for(byte i=2; i < 14; i++){
+    pinMode(i, 1);  
   }
 
-  for(byte i = 0; i < 3; i++){
-    pinMode(pinRGB[i], 1);
-  }
+
 
 }
 
 void loop() {
-  Serial.write(dato);
-  while(Bluetooth.available()>0){
-    dato=Bluetooth.read();
-  }
+  
+  if (Serial.available()>0){
+    dato = Serial.read();
 
-  switch(dato){
-    case 'a':
-      adelante();
-      cambioLedRGB(0,0,255);
-      break;
-    case 'b':
-      atras();
-      cambioLedRGB(0,127,127);
-      break;
-    case 'r':
-      derecha();
-      cambioLedRGB(255,255,0);
-      break;
-    case 'l':
-      izquierda();
-      cambioLedRGB(255,255,0);
-      break;
-    case 'g':
-      gito360Left();
-      cambioLedRGB(0,51,102);
-      break;
-    case 'h':
-      gito360Right();
-      cambioLedRGB(0,51,102);
-      break;
-    case 'f':
-      frenar();
-      cambioLedRGB(255,0,0);
-      break;
-    default:
-      parar();
-      cambioLedRGB(255,255,255);
-      break;
+    while(dato == '#'){
+      velocidad = Serial.parseInt();
+      Serial.println(velocidad);
+      delay(1);
+
+      dato=0;
+    }
+
+    
+    switch (dato){
+      case 'A':
+        adelante(velocidad);
+        break;
+
+      case 'B':
+        atras(velocidad);
+        break;
+
+      case 'D':
+        giro360d(velocidad);
+        break;
+
+      case 'I':
+        giro360i(velocidad);
+        break;
+      /*
+      case 'G':
+        giro360(velocidad);
+        break;
+      */
+      
+      default:
+        apagar(0);
+        break;
+    }
+
+    datoViejo = dato;
+  }
+}
+
+
+void adelante(byte velocidad){
+
+  if (dato != datoViejo){
+    //Para de inicio
+    analogWrite(6, 0); analogWrite(10, 0);
+    analogWrite(5, 0); analogWrite(9, 0);
+    delay(esperaInicial);
+    for(int i = 0; i < velocidad; i++ ){
+
+      Serial.println("subiendo...");
+      //aumento de velocidad de a un milisegungo      
+      analogWrite(6, i+20); analogWrite(10, i+20);
+      analogWrite(5, i+15); analogWrite(9, i);
+      
+    
+      digitalWrite(4,1); digitalWrite(11,1);
+      digitalWrite(3,1); digitalWrite(12,1);
+    
+      digitalWrite(7,0); digitalWrite(8,0);
+      digitalWrite(2,0); digitalWrite(13,0);
+
+      delay(T);
+      
+    }
+    
+  }
+  else{
+
+    analogWrite(6, velocidad); analogWrite(10, velocidad);
+    analogWrite(5, velocidad+15); analogWrite(9, velocidad);
+    
+    
+  
+    digitalWrite(4,1); digitalWrite(11,1);
+    digitalWrite(3,1); digitalWrite(12,1);
+  
+    digitalWrite(7,0); digitalWrite(8,0);
+    digitalWrite(2,0); digitalWrite(13,0);
+    
+  }
+  
+
+}
+
+
+
+void atras(byte velocidad){
+
+  if (dato != datoViejo){
+    //Para de inicio
+    analogWrite(6, 0); analogWrite(10, 0);
+    analogWrite(5, 0); analogWrite(9, 0);
+    delay(esperaInicial);
+    for(int i = 0; i < velocidad; i++ ){
+      Serial.println("subiendo...  atras");
+      //aumento de velocidad de a un milisegungo      
+      analogWrite(6, i+20); analogWrite(10, i+20);
+      analogWrite(5, i+15); analogWrite(9, i);
+
+      digitalWrite(4,0); digitalWrite(11,0);
+      digitalWrite(3,0); digitalWrite(12,0);
+
+      digitalWrite(7,1); digitalWrite(8,1);
+      digitalWrite(2,1); digitalWrite(13,1);
+
+      delay(T);
+    }
+      
+   }
+   else{
+
+      analogWrite(6, velocidad); analogWrite(10, velocidad);
+      analogWrite(5, velocidad+15); analogWrite(9, velocidad);
+    
+      digitalWrite(4,0); digitalWrite(11,0);
+      digitalWrite(3,0); digitalWrite(12,0);
+    
+      digitalWrite(7,1); digitalWrite(8,1);
+      digitalWrite(2,1); digitalWrite(13,1);
+        
+   }
+  
+}
+
+
+void izquierda(byte velocidad){
+  
+  analogWrite(6, velocidad); analogWrite(10, velocidad);
+  analogWrite(5, velocidad+15); analogWrite(9, velocidad);
+  
+
+  digitalWrite(4,0); digitalWrite(11,1);
+  digitalWrite(3,0); digitalWrite(12,1);
+
+  digitalWrite(7,0); digitalWrite(8,0);
+  digitalWrite(2,0); digitalWrite(13,0);
+  
+}
+
+
+void derecha(byte velocidad){
+  
+  analogWrite(6, velocidad); analogWrite(10, velocidad);
+  analogWrite(5, velocidad+15); analogWrite(9, velocidad);
+  
+
+  digitalWrite(4,1); digitalWrite(11,0);
+  digitalWrite(3,1); digitalWrite(12,0);
+
+  digitalWrite(7,0); digitalWrite(8,0);
+  digitalWrite(2,0); digitalWrite(13,0);
+  
+}
+
+void giro360d(byte velocidad){
+
+  if (dato != datoViejo){
+    //Para de inicio
+//    analogWrite(6, 0); analogWrite(10, 0);
+//    analogWrite(5, 0); analogWrite(9, 0);
+    delay(esperaInicial);
+    for(int i = 0; i < velocidad; i++ ){
+      
+      Serial.println("subiendo...  DERECHA");
+      analogWrite(6, i+20); analogWrite(10, i+20);
+      analogWrite(5, i+15); analogWrite(9, i);
+      
+    
+      digitalWrite(4,1); digitalWrite(11,0);
+      digitalWrite(3,1); digitalWrite(12,0);
+    
+      digitalWrite(7,0); digitalWrite(8,1);
+      digitalWrite(2,0); digitalWrite(13,1);
+      delay(T);  
+    }
+    
+
+  }
+  else{
+
+    analogWrite(6, velocidad); analogWrite(10, velocidad);
+    analogWrite(5, velocidad+15); analogWrite(9, velocidad);
+    
+  
+    digitalWrite(4,1); digitalWrite(11,0);
+    digitalWrite(3,1); digitalWrite(12,0);
+  
+    digitalWrite(7,0); digitalWrite(8,1);
+    digitalWrite(2,0); digitalWrite(13,1);
+    
   }
   
 }
 
-void cambioLedRGB(short R, short G, short B){
-  analogWrite(pinRGB[0],R);
-  analogWrite(pinRGB[1],G);
-  analogWrite(pinRGB[2],B);
-}
 
 
-void adelante(){
-  digitalWrite(motores[0],1);
-  digitalWrite(motores[1],0);
-  digitalWrite(motores[2],1);
-  digitalWrite(motores[3],0);
-}
+void giro360i(byte velocidad){
 
-void atras(){
-  digitalWrite(motores[0],0);
-  digitalWrite(motores[1],1);
-  digitalWrite(motores[2],0);
-  digitalWrite(motores[3],1);
-}
+  if (dato != datoViejo){
+    //Para de inicio
+    //analogWrite(6, 0); analogWrite(10, 0);
+    //analogWrite(5, 0); analogWrite(9, 0);
+    delay(esperaInicial);
+    for(int i = 0; i < velocidad; i++ ){
+       Serial.println("subiendo...  izquierda");
+      analogWrite(6, i+20); analogWrite(10, i+20);
+      analogWrite(5, i+15); analogWrite(9, i);
+      
+    
+      digitalWrite(4,0); digitalWrite(11,1);
+      digitalWrite(3,0); digitalWrite(12,1);
+    
+      digitalWrite(7,1); digitalWrite(8,0);
+      digitalWrite(2,1); digitalWrite(13,0);
 
-void derecha(){
-  digitalWrite(motores[0],0);
-  digitalWrite(motores[1],0);
-  digitalWrite(motores[2],1);
-  digitalWrite(motores[3],0);
-}
+      delay(T);
+    }
+    
+  }
+  else{
 
-void izquierda(){
-  digitalWrite(motores[0],1);
-  digitalWrite(motores[1],0);
-  digitalWrite(motores[2],0);
-  digitalWrite(motores[3],0);
-}
+      analogWrite(6, velocidad); analogWrite(10, velocidad);
+      analogWrite(5, velocidad+15); analogWrite(9, velocidad);
+      
+    
+      digitalWrite(4,0); digitalWrite(11,1);
+      digitalWrite(3,0); digitalWrite(12,1);
+    
+      digitalWrite(7,1); digitalWrite(8,0);
+      digitalWrite(2,1); digitalWrite(13,0);
 
-void gito360Left(){
-  digitalWrite(motores[0],1);
-  digitalWrite(motores[1],0);
-  digitalWrite(motores[2],0);
-  digitalWrite(motores[3],1);
-}
-
-void gito360Right(){
-  digitalWrite(motores[0],0);
-  digitalWrite(motores[1],1);
-  digitalWrite(motores[2],1);
-  digitalWrite(motores[3],0);
-}
-
-
-void parar(){
-  digitalWrite(motores[0],0);
-  digitalWrite(motores[1],0);
-  digitalWrite(motores[2],0);
-  digitalWrite(motores[3],0);
-}
-
-
-void frenar(){
-  digitalWrite(motores[0],1);
-  digitalWrite(motores[1],1);
-  digitalWrite(motores[2],1);
-  digitalWrite(motores[3],1);
-  delay(100);
-  dato = 0;
+      
+  }
+    
   
+}
+
+void apagar(byte velocidad){
+  
+  analogWrite(6, velocidad); analogWrite(10, velocidad);
+  analogWrite(5, velocidad); analogWrite(9, velocidad);
+  
+
+  digitalWrite(4,0); digitalWrite(11,0);
+  digitalWrite(3,0); digitalWrite(12,0);
+
+  digitalWrite(7,0); digitalWrite(8,0);
+  digitalWrite(2,0); digitalWrite(13,0);
+  
+}
+
+
+void arrancadorSuave(int velMAx, int intervalo){
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= intervalo) {
+    // save the last time you blinked the LED
+    
+  }
+    
 }
