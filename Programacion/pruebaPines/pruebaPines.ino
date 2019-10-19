@@ -1,3 +1,22 @@
+/*
+          PINES BARREDOR
+4  ||         Adelante       || 11 
+   ||-6--------PWM--------10-||
+7  ||         Atras          || 8
+                |
+                |
+                |
+                |
+                |
+                |
+                |
+3  ||        Adelante        || 12
+   ||-5--------PWM---------9-||
+2  ||        Atras           || 13
+
+*/
+
+
 volatile char dato = 0, datoViejo = 0;
 String data = "";
 int velocidad = 100, T=5, esperaInicial=1500;
@@ -77,8 +96,8 @@ void adelante(byte velocidad){
 
       Serial.println("subiendo...");
       //aumento de velocidad de a un milisegungo      
-      analogWrite(6, i); analogWrite(10, i + 20);
-      analogWrite(5, i); analogWrite(9, i + 20);
+      analogWrite(6, i+20); analogWrite(10, i+20);
+      analogWrite(5, i+15); analogWrite(9, i);
       
     
       digitalWrite(4,1); digitalWrite(11,1);
@@ -94,8 +113,8 @@ void adelante(byte velocidad){
   }
   else{
 
-    analogWrite(6, velocidad); analogWrite(10, velocidad + 20);
-    analogWrite(5, velocidad); analogWrite(9, velocidad + 20);
+    analogWrite(6, velocidad); analogWrite(10, velocidad);
+    analogWrite(5, velocidad+15); analogWrite(9, velocidad);
     
     
   
@@ -122,8 +141,8 @@ void atras(byte velocidad){
     for(int i = 0; i < velocidad; i++ ){
       Serial.println("subiendo...  atras");
       //aumento de velocidad de a un milisegungo      
-      analogWrite(6, i); analogWrite(10, i + 20);
-      analogWrite(5, i); analogWrite(9, i + 20);
+      analogWrite(6, i+20); analogWrite(10, i+20);
+      analogWrite(5, i+15); analogWrite(9, i);
 
       digitalWrite(4,0); digitalWrite(11,0);
       digitalWrite(3,0); digitalWrite(12,0);
@@ -137,9 +156,8 @@ void atras(byte velocidad){
    }
    else{
 
-      analogWrite(6, velocidad); analogWrite(10, velocidad+20);
-      analogWrite(5, velocidad); analogWrite(9, velocidad+20);
-      
+      analogWrite(6, velocidad); analogWrite(10, velocidad);
+      analogWrite(5, velocidad+15); analogWrite(9, velocidad);
     
       digitalWrite(4,0); digitalWrite(11,0);
       digitalWrite(3,0); digitalWrite(12,0);
@@ -155,7 +173,7 @@ void atras(byte velocidad){
 void izquierda(byte velocidad){
   
   analogWrite(6, velocidad); analogWrite(10, velocidad);
-  analogWrite(5, velocidad); analogWrite(9, velocidad);
+  analogWrite(5, velocidad+15); analogWrite(9, velocidad);
   
 
   digitalWrite(4,0); digitalWrite(11,1);
@@ -170,7 +188,7 @@ void izquierda(byte velocidad){
 void derecha(byte velocidad){
   
   analogWrite(6, velocidad); analogWrite(10, velocidad);
-  analogWrite(5, velocidad); analogWrite(9, velocidad);
+  analogWrite(5, velocidad+15); analogWrite(9, velocidad);
   
 
   digitalWrite(4,1); digitalWrite(11,0);
@@ -189,9 +207,10 @@ void giro360d(byte velocidad){
 //    analogWrite(5, 0); analogWrite(9, 0);
     delay(esperaInicial);
     for(int i = 0; i < velocidad; i++ ){
-       Serial.println("subiendo...  DERECHA");
-      analogWrite(6, i); analogWrite(10, i+20);
-      analogWrite(5, i); analogWrite(9, i+20);
+      
+      Serial.println("subiendo...  DERECHA");
+      analogWrite(6, i+20); analogWrite(10, i+20);
+      analogWrite(5, i+15); analogWrite(9, i);
       
     
       digitalWrite(4,1); digitalWrite(11,0);
@@ -206,8 +225,8 @@ void giro360d(byte velocidad){
   }
   else{
 
-    analogWrite(6, velocidad); analogWrite(10, velocidad+20);
-    analogWrite(5, velocidad); analogWrite(9, velocidad+20);
+    analogWrite(6, velocidad); analogWrite(10, velocidad);
+    analogWrite(5, velocidad+15); analogWrite(9, velocidad);
     
   
     digitalWrite(4,1); digitalWrite(11,0);
@@ -231,8 +250,8 @@ void giro360i(byte velocidad){
     delay(esperaInicial);
     for(int i = 0; i < velocidad; i++ ){
        Serial.println("subiendo...  izquierda");
-      analogWrite(6, i); analogWrite(10, i+20);
-      analogWrite(5, i); analogWrite(9, i+20);
+      analogWrite(6, i+20); analogWrite(10, i+20);
+      analogWrite(5, i+15); analogWrite(9, i);
       
     
       digitalWrite(4,0); digitalWrite(11,1);
@@ -247,8 +266,8 @@ void giro360i(byte velocidad){
   }
   else{
 
-      analogWrite(6, velocidad); analogWrite(10, velocidad+20);
-      analogWrite(5, velocidad); analogWrite(9, velocidad+20);
+      analogWrite(6, velocidad); analogWrite(10, velocidad);
+      analogWrite(5, velocidad+15); analogWrite(9, velocidad);
       
     
       digitalWrite(4,0); digitalWrite(11,1);
